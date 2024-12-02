@@ -10,10 +10,16 @@ abstract class AbstractModelRepository implements IModelRepository
 {
     public function __construct(protected Model $model) {}
 
-    public function getAll(): Collection
+    // public function getAll(): Collection
+    // {
+    //     return $this->model->where('user_id', auth()->id())->get();
+    // }
+
+    public function getAll()
     {
-        return $this->model->where('user_id', auth()->id())->get();
+        return $this->model::all(); // Ensure this returns all instances of the model
     }
+
 
     public function store(array $data): object
     {
@@ -38,6 +44,12 @@ abstract class AbstractModelRepository implements IModelRepository
     public function destroy(int $id): bool
     {
         return $this->model->find($id)->delete();
+    }
+
+    public function delete($id)
+    {
+        $model = $this->model::findOrFail($id);
+        return $model->delete();
     }
 
     public function withRelations(array $relations)

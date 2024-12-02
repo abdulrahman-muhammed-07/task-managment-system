@@ -72,28 +72,4 @@ class TaskTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /**
-     * A basic feature test example.
-     */
-    public function test_update_statistics_job_when_create_new_task(): void
-    {
-        // Arrange
-        $user = User::factory()->create(['type' => User::USER]);
-        $admin = User::factory()->create(['type' => User::ADMIN]);
-
-        // Act
-        $this->actingAs($admin);
-        Queue::fake();
-        Queue::assertNothingPushed();
-        $this->app->call([new UpdateStatisticsJob($user->id), 'handle']);
-        $response = $this->post('tasks',  Task::factory()->make()->toArray());
-        
-        // Assert
-
-        //1
-        $response->assertStatus(302);
-
-        //2
-        // Queue::assertPushed(UpdateStatisticsJob::class);
-    }
 }

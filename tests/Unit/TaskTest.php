@@ -2,8 +2,9 @@
 
 namespace Tests\Unit;
 
-use App\Models\Task;
 use Tests\TestCase;
+use App\Models\Task;
+use App\Models\User;
 use App\Repositories\SQL\TaskRepository;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 
@@ -12,37 +13,43 @@ class TaskTest extends TestCase
     use DatabaseMigrations;
     protected $repository;
 
-    public function setUp(): void
+
+    protected function setUp(): void
     {
         parent::setUp();
+        User::factory()->count(5)->create();
         $this->repository = new TaskRepository(new Task());
     }
 
     public function test_can_get_list_of_tasks()
     {
-        $tasksDataBase = Task::factory()->count(3)->create()->count();
-
-        $tasks = $this->repository->getAll();
-
-        $this->assertEquals($tasksDataBase, count($tasks));
+        $assignedTo = User::factory()->create();
+        $assignedBy = User::factory()->create();
+        $tasks = Task::factory()->count(3)->create([
+            'assigned_to_id' => $assignedTo->id,
+            'assigned_by_id' => $assignedBy->id,
+        ]);
+        $retrievedTasks = $this->repository->getAll();
+        $this->assertEquals($tasks->count(), $retrievedTasks->count());
     }
 
     public function test_can_get_task_by_id()
     {
-        Task::factory()->count(3)->create([
+        $task = Task::factory()->create([
             'title' => 'John Doe',
         ]);
-
-        $task = $this->repository->find(1)->title;
-
-        $this->assertEquals('John Doe', $task);
+        $foundTask = $this->repository->find($task->id);
+        $this->assertEquals('John Doe', $foundTask->title);
     }
 
-    /**
-     * A basic unit test example.
-     */
-    public function test_example(): void
+    public function test_can_update_task_by_id()
     {
-        $this->assertTrue(true);
+        $task = Task::factory()->create([
+            'title' => 'John Doe',
+        ]);
+        $this->repository->update($task->id, [
+            'title' => 'Jane Doe',
+        ]);
+        $this->assertEquals('Jane Doe', $this->repository->find($task->id)->title);
     }
 }
