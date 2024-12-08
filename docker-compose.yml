@@ -21,6 +21,8 @@ services:
     image: mysql:8.0
     container_name: ${DB_CONTAINER_NAME:-mysql}
     restart: unless-stopped
+    ports:
+      - "3309:3306"
     environment:
       MYSQL_ROOT_PASSWORD: test123  # This matches your current password
       MYSQL_DATABASE: task_management_system
